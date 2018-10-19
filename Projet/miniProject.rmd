@@ -1,0 +1,79 @@
+---
+title: "Mini Project"
+author: "Yixiao FEI"
+date: "Oct 19, 2018"
+output: html_document
+---
+
+## Initialization
+```{r}
+set.seed(1, kind="Marsaglia-Multicarry")
+setwd("H:/Documents/WorkSpace/MDI220/Projet")
+```
+
+## Exercice 1
+### 1.1
+```{r}
+data<-read.csv('NuclearPowerAccidents2016.csv',header=TRUE)
+cost_vector <- c()
+for (i in 1:nrow(data)) {
+  if(as.Date(data[i, 1], "%m/%d/%Y") < "1979-03-28"){
+    if(!is.na(data[i, 3])){
+      cost_vector <- c(cost_vector, data[i, 3])
+    }
+  }
+}
+sprintf("The length of the cost vector is %d.", length(cost_vector))
+```
+### 1.2 (a)
+Supposon que $X \sim \mathcal{N}(\mu, \sigma^2)$
+
+Il existe $Z \sim \mathcal{N}(0, 1)$ tel que $X=\sigma Z + \mu$
+
+Or $F^{-1} (p;\mu,\sigma^2)=\inf_{x} [F(x;\mu,\sigma^2) \geq p]=\inf_{x}[P_{\mu, \sigma^2}(X \leq x) \geq p]$
+
+Donc $F^{-1} (p;\mu,\sigma^2)=\inf_{x}[P_{0, 1}(\sigma Z \leq x-\mu) \geq p]=\mu+\inf_{y}[P_{0, 1}(\sigma Z \leq y) \geq p]$
+
+Posons $\sigma z= y$
+
+$F^{-1} (p;\mu,\sigma^2)= \mu+\inf_{y}[P_{0, 1}( Z \leq\frac{y}{\sigma}) \geq p]$
+
+Or $P_{0, 1}( Z \leq\frac{y}{\sigma}) \geq p = \int_{-\infty}^{\frac{y}{\sigma}} norm(u)\,\mathrm{d}u$ où $norm(u)$ décrit la fonction de densité d'une loi normale centrée réduite
+
+Après le changement de variable, nous avons $\int_{-\infty}^{\frac{y}{\sigma}} norm(u)\,\mathrm{d}u=\sigma\int_{-\infty}^{z} norm(u)\,\mathrm{d}u$
+
+Or $\inf_z[\int_{-\infty}^{z} norm(u)\,\mathrm{d}u \geq p]=F^{-1} (p;0,1)$
+
+Finalement, $F^{-1} (p;\mu,\sigma^2)=\mu+\sigma F^{-1} (p;0,1)$
+
+### 1.2 (b)
+```{r}
+n<-10
+
+x<-rnorm(2*n-1)
+y<-quantile(x, probs = seq(2*n-1)/2/n)
+two_point<-c(y["25%"],y["75%"])
+unname(y)
+plot(seq(2*n-1)/2/n,y,type = "p", col="red",xlab="Quantiles",ylab = "X")
+b<- (two_point[2]-two_point[1])*2
+a<-two_point[1]-0.25*b
+abline(a, b, col="blue")
+
+```
+### 1.2 (c)
+```{r}
+n<-10
+x<-qqnorm(1000)
+y<-quantile(x, probs = seq(2*n-1)/2/n)
+two_point<-c(y["25%"],y["75%"])
+unname(y)
+plot(seq(2*n-1)/2/n,y,type = "p", col="red",xlab="Quantiles",ylab = "X")
+b<- (two_point[2]-two_point[1])*2
+a<-two_point[1]-0.25*b
+abline(a, b, col="blue")
+
+```
+
+
+
+

@@ -28,52 +28,101 @@ sprintf("The length of the cost vector is %d.", length(cost_vector))
 ### 1.2 (a)
 Supposon que $X \sim \mathcal{N}(\mu, \sigma^2)$
 
-Il existe $Z \sim \mathcal{N}(0, 1)$ tel que $X=\sigma Z + \mu$
+Il existe $Z \sim \mathcal{N}(0, 1)$ tel que $X=\sigma Z + \mu$, $Z$ suit une loi normale centrée réduite.
 
 Or $F^{-1} (p;\mu,\sigma^2)=\inf_{x} [F(x;\mu,\sigma^2) \geq p]=\inf_{x}[P_{\mu, \sigma^2}(X \leq x) \geq p]$
 
-Donc $F^{-1} (p;\mu,\sigma^2)=\inf_{x}[P_{0, 1}(\sigma Z \leq x-\mu) \geq p]=\mu+\inf_{y}[P_{0, 1}(\sigma Z \leq y) \geq p]$
+Donc $F^{-1} (p;\mu,\sigma^2)=\inf_{x}[P_{0, 1}(Z \leq \frac{x-\mu}{\sigma}) \geq p]$
 
-Posons $\sigma z= y$
+Supposons $x^* \in \mathbb{R}$ tel que $x^*=\inf_x[P_{0, 1}(Z \leq \frac{x-\mu}{\sigma}) \geq p]$
 
-$F^{-1} (p;\mu,\sigma^2)= \mu+\inf_{y}[P_{0, 1}( Z \leq\frac{y}{\sigma}) \geq p]$
+Alors, $F^{-1}(p;0,1) = \frac{x^*-\mu}{\sigma}$
 
-Or $P_{0, 1}( Z \leq\frac{y}{\sigma}) \geq p = \int_{-\infty}^{\frac{y}{\sigma}} norm(u)\,\mathrm{d}u$ où $norm(u)$ décrit la fonction de densité d'une loi normale centrée réduite
-
-Après le changement de variable, nous avons $\int_{-\infty}^{\frac{y}{\sigma}} norm(u)\,\mathrm{d}u=\sigma\int_{-\infty}^{z} norm(u)\,\mathrm{d}u$
-
-Or $\inf_z[\int_{-\infty}^{z} norm(u)\,\mathrm{d}u \geq p]=F^{-1} (p;0,1)$
+Donc $x^*=\mu+\sigma F^{-1}(p;0,1)$
 
 Finalement, $F^{-1} (p;\mu,\sigma^2)=\mu+\sigma F^{-1} (p;0,1)$
 
 ### 1.2 (b)
 ```{r}
-n<-10
-
+n<-100
 x<-rnorm(2*n-1)
-y<-quantile(x, probs = seq(2*n-1)/2/n)
-two_point<-c(y["25%"],y["75%"])
-unname(y)
-plot(seq(2*n-1)/2/n,y,type = "p", col="red",xlab="Quantiles",ylab = "X")
-b<- (two_point[2]-two_point[1])*2
-a<-two_point[1]-0.25*b
+t<-(rank(x)-0.5)/length(x) # To avoid infinity in q
+q<-qnorm(t)
+
+index1<-as.integer(0.25*length(x))
+index2<-as.integer(0.75*length(x))
+b<-(x[index2]-x[index1])/(q[index2]-q[index1])
+a<-x[index1]-b*q[index1]
+
+plot(q,x, type="p", col="red")
 abline(a, b, col="blue")
 
 ```
+
 ### 1.2 (c)
 ```{r}
-n<-10
-x<-qqnorm(1000)
-y<-quantile(x, probs = seq(2*n-1)/2/n)
-two_point<-c(y["25%"],y["75%"])
-unname(y)
-plot(seq(2*n-1)/2/n,y,type = "p", col="red",xlab="Quantiles",ylab = "X")
-b<- (two_point[2]-two_point[1])*2
-a<-two_point[1]-0.25*b
+qqnorm(x, col="red", type="p")
+qqline(x, probs = c(0.25,0.75),col="blue",lwd=2)
+
+```
+
+### 1.2 (d)
+Le QQ-plot représente presque parfaitement une droite afine d'une fonction $f(x)=x$, donc le modèle des lois normales sont adaptées.
+
+### 1.3 (a)
+Nous avons $F^{-1}(p;\lambda)=\inf_x[P_{\lambda}(X \leq x) \geq p]$
+
+Or pour $x\geq 0, P_{\lambda}(X \leq x) = \int_0^x \lambda \mathrm{e}^{-\lambda u} \mathrm{d}u$
+
+Sinon, $P_{\lambda}(X \leq x) = 0$
+
+Après le changement de variable, nous avons $P_{\lambda}(X \leq x)=\int_0^{\lambda x}  \mathrm{e}^{- u} \mathrm{d}u=P_{1}(X \leq \lambda x)=F(\lambda x;1)$
+
+Supposons $x^* \geq 0$, tel que $x^*=\inf_x [F(\lambda x;1)\geq p]$
+
+Alors $F^{-1}(p;1)=\lambda x^*$
+
+Donc $x^*=\frac{1}{\lambda}F^{-1}(p;1)$
+
+Finalement, $F^{-1}(p;\lambda)=\frac{1}{\lambda}F^{-1}(p;1)$
+
+### 1.3 (b)
+```{r}
+x<-rexp(2*n-1)
+t<-(rank(x)-0.5)/length(x) # To avoid infinity in q
+q<-qexp(t)
+
+index1<-as.integer(0.25*length(x))
+index2<-as.integer(0.75*length(x))
+b<-(x[index2]-x[index1])/(q[index2]-q[index1])
+a<-x[index1]-b*q[index1]
+
+plot(q,x, type="p", col="red")
 abline(a, b, col="blue")
 
 ```
 
+### 1.3 (c)
+```{r}
+#qqexp(x, col="red", type="p")
+#qqline(x, probs = c(0.25,0.75),col="blue",lwd=2)
+plot(q, rep(0, length(q)), type="p", col="red")
+
+```
+
+### 1.3 (d)
+```{r}
+x<-rexp(2*n-1)
+hist(x,freq = F,col="blue")
+temp<-1/mean(x)
+curve(dexp(x, temp), col="red",add=T)
+```
+
+### 1.3 (e)
+Une loi exponentielle semble être plus plausible qu'une loi normale. La droite affine dans le QQ-diagramme réalise presque parfaitement la fonction $f(x)=x$.
+
+## Exercice 2
+### 2.1
 
 
 
